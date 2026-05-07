@@ -776,6 +776,67 @@ body {
   font-size: 15px;
 }
 
+.login-page {
+  width: 100%;
+  padding: 24px 14px;
+}
+
+.login-card {
+  width: min(460px, 100%);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfbff 100%);
+  box-shadow: 0 18px 44px rgba(32, 38, 64, 0.12);
+  padding: 28px 22px;
+}
+
+.login-badge {
+  margin: 0;
+  color: #6a58f0;
+  font-size: 18px;
+  letter-spacing: 0.3px;
+}
+
+.login-title {
+  margin-top: 8px;
+  font-size: clamp(42px, 6vw, 54px);
+  line-height: 0.95;
+}
+
+.login-subtitle {
+  margin-top: 10px;
+  font-size: 22px;
+}
+
+.login-form {
+  margin-top: 20px;
+  gap: 12px;
+}
+
+.login-label {
+  font-size: 16px;
+}
+
+.login-input {
+  height: 50px;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.login-submit {
+  min-height: 50px;
+  margin-top: 4px;
+}
+
+.login-status {
+  min-height: 22px;
+}
+
+.login-switch {
+  margin-top: 8px;
+  width: 100%;
+}
+
 .calendar-card {
   padding: 16px;
   border-radius: 20px;
@@ -1084,6 +1145,106 @@ body {
   font-weight: 700;
 }
 
+.landing-page {
+  width: 100%;
+  padding: 20px 14px 28px;
+}
+
+.landing-shell {
+  width: min(980px, 100%);
+  display: grid;
+  gap: 14px;
+}
+
+.landing-hero,
+.landing-benefit-card,
+.landing-cta {
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: #fff;
+}
+
+.landing-hero {
+  padding: 22px 18px;
+  display: grid;
+  gap: 10px;
+}
+
+.landing-badge {
+  margin: 0;
+  color: #6a58f0;
+  font-size: 18px;
+}
+
+.landing-title {
+  margin: 0;
+  font-size: clamp(38px, 6vw, 56px);
+  line-height: 0.95;
+}
+
+.landing-subtitle {
+  margin: 0;
+  color: var(--muted);
+  font-size: 22px;
+}
+
+.landing-actions {
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.landing-primary {
+  min-height: 48px;
+  padding: 0 22px;
+}
+
+.landing-secondary {
+  min-height: 48px;
+  padding: 0 22px;
+}
+
+.landing-benefits {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.landing-benefit-card {
+  padding: 14px;
+  display: grid;
+  gap: 6px;
+}
+
+.landing-benefit-title {
+  margin: 0;
+  font-size: 26px;
+}
+
+.landing-benefit-text {
+  margin: 0;
+  color: #60697e;
+  font-size: 17px;
+}
+
+.landing-cta {
+  padding: 16px;
+  display: grid;
+  gap: 8px;
+}
+
+.landing-cta-title {
+  margin: 0;
+  font-size: 34px;
+}
+
+.landing-cta-text {
+  margin: 0;
+  color: #60697e;
+  font-size: 18px;
+}
+
 .mobile-nav-item,
 .mobile-nav-center {
   border: 0;
@@ -1135,6 +1296,7 @@ body {
 @media (max-width: 900px) {
   .tracker-grid { grid-template-columns: 1fr; }
   .tracker-section-wide { grid-column: auto; }
+  .landing-benefits { grid-template-columns: 1fr; }
 }
 
 @media (min-width: 901px) {

@@ -2,52 +2,54 @@ export default function renderLoginPage(container, router) {
   if (!container) return;
 
   const page = document.createElement('section');
-  page.className = 'auth-page';
+  page.className = 'auth-page login-page';
 
   const card = document.createElement('div');
-  card.className = 'auth-card';
+  card.className = 'auth-card login-card';
 
   const title = document.createElement('h1');
-  title.className = 'auth-title';
-  title.textContent = 'Welcome Back';
+  title.className = 'auth-title login-title';
+  title.textContent = 'Welcome back';
 
   const subtitle = document.createElement('p');
-  subtitle.className = 'auth-subtitle';
+  subtitle.className = 'auth-subtitle login-subtitle';
   subtitle.textContent = 'Track your streaks and keep momentum.';
 
   const form = document.createElement('form');
-  form.className = 'auth-form';
+  form.className = 'auth-form login-form';
 
   const idLabel = document.createElement('label');
-  idLabel.className = 'auth-label';
+  idLabel.className = 'auth-label login-label';
   idLabel.textContent = 'Username or Email';
 
   const identifier = document.createElement('input');
-  identifier.className = 'auth-input';
+  identifier.className = 'auth-input login-input';
   identifier.name = 'identifier';
+  identifier.placeholder = 'alex@example.com';
   identifier.required = true;
 
   const passLabel = document.createElement('label');
-  passLabel.className = 'auth-label';
+  passLabel.className = 'auth-label login-label';
   passLabel.textContent = 'Password';
 
   const password = document.createElement('input');
-  password.className = 'auth-input';
+  password.className = 'auth-input login-input';
   password.name = 'password';
   password.type = 'password';
+  password.placeholder = '••••••••';
   password.required = true;
 
   const status = document.createElement('p');
-  status.className = 'auth-status';
+  status.className = 'auth-status login-status';
 
   const submit = document.createElement('button');
-  submit.className = 'auth-button';
+  submit.className = 'auth-button login-submit';
   submit.type = 'submit';
-  submit.textContent = 'Login';
+  submit.textContent = 'Sign in';
 
   const switchLink = document.createElement('button');
   switchLink.type = 'button';
-  switchLink.className = 'auth-link-button';
+  switchLink.className = 'auth-link-button login-switch';
   switchLink.textContent = 'Create account';
   switchLink.addEventListener('click', () => router?.navigate('/register'));
 
