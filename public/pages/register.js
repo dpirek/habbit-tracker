@@ -2,62 +2,65 @@ export default function renderRegisterPage(container, router) {
   if (!container) return;
 
   const page = document.createElement('section');
-  page.className = 'auth-page';
+  page.className = 'auth-page login-page';
 
   const card = document.createElement('div');
-  card.className = 'auth-card';
+  card.className = 'auth-card login-card';
 
   const title = document.createElement('h1');
-  title.className = 'auth-title';
+  title.className = 'auth-title login-title';
   title.textContent = 'Create Account';
 
   const subtitle = document.createElement('p');
-  subtitle.className = 'auth-subtitle';
+  subtitle.className = 'auth-subtitle login-subtitle';
   subtitle.textContent = 'Start with one habit. Build your streak daily.';
 
   const form = document.createElement('form');
-  form.className = 'auth-form';
+  form.className = 'auth-form login-form';
 
   const usernameLabel = document.createElement('label');
-  usernameLabel.className = 'auth-label';
+  usernameLabel.className = 'auth-label login-label';
   usernameLabel.textContent = 'Username';
 
   const username = document.createElement('input');
-  username.className = 'auth-input';
+  username.className = 'auth-input login-input';
   username.name = 'username';
+  username.placeholder = 'alex';
   username.required = true;
 
   const emailLabel = document.createElement('label');
-  emailLabel.className = 'auth-label';
+  emailLabel.className = 'auth-label login-label';
   emailLabel.textContent = 'Email';
 
   const email = document.createElement('input');
-  email.className = 'auth-input';
+  email.className = 'auth-input login-input';
   email.type = 'email';
   email.name = 'email';
+  email.placeholder = 'alex@example.com';
   email.required = true;
 
   const passLabel = document.createElement('label');
-  passLabel.className = 'auth-label';
+  passLabel.className = 'auth-label login-label';
   passLabel.textContent = 'Password';
 
   const password = document.createElement('input');
-  password.className = 'auth-input';
+  password.className = 'auth-input login-input';
   password.name = 'password';
   password.type = 'password';
+  password.placeholder = '••••••••';
   password.required = true;
 
   const status = document.createElement('p');
-  status.className = 'auth-status';
+  status.className = 'auth-status login-status';
 
   const submit = document.createElement('button');
-  submit.className = 'auth-button';
+  submit.className = 'auth-button login-submit';
   submit.type = 'submit';
   submit.textContent = 'Create account';
 
   const switchLink = document.createElement('button');
   switchLink.type = 'button';
-  switchLink.className = 'auth-link-button';
+  switchLink.className = 'auth-link-button login-switch';
   switchLink.textContent = 'Already have an account? Login';
   switchLink.addEventListener('click', () => router?.navigate('/login'));
 

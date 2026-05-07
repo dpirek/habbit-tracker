@@ -5,92 +5,73 @@ export default async function renderHomePage(container, router) {
   page.className = 'auth-page landing-page';
 
   const shell = document.createElement('div');
-  shell.className = 'landing-shell';
+  shell.className = 'landing-shell-v2';
 
-  const hero = document.createElement('header');
-  hero.className = 'landing-hero';
+  const top = document.createElement('header');
+  top.className = 'landing-topbar';
+  top.innerHTML = ``;
 
-  const badge = document.createElement('p');
-  badge.className = 'landing-badge';
-  badge.textContent = 'Habit Tracker';
+  const pill = document.createElement('p');
+  pill.className = 'landing-pill';
+  pill.textContent = '✨ Build habits. Track progress.';
 
   const title = document.createElement('h1');
-  title.className = 'landing-title';
-  title.textContent = 'Build better habits, one day at a time.';
+  title.className = 'landing-title-v2';
+  title.innerHTML = 'Small steps today,<br><span>big change</span><br>tomorrow.';
 
   const subtitle = document.createElement('p');
-  subtitle.className = 'landing-subtitle';
-  subtitle.textContent = 'Stay consistent with guided templates, progress insights, and streak-focused tracking.';
+  subtitle.className = 'landing-subtitle-v2';
+  subtitle.textContent = 'Habitly helps you build better habits, stay consistent, and become the best version of yourself.';
 
-  const actions = document.createElement('div');
-  actions.className = 'landing-actions';
+  const ctas = document.createElement('div');
+  ctas.className = 'landing-cta-stack';
+  const primary = document.createElement('button');
+  primary.type = 'button';
+  primary.className = 'auth-button landing-cta-primary';
+  primary.textContent = 'Get Started Free';
+  primary.addEventListener('click', () => router?.navigate('/register'));
+  const secondary = document.createElement('button');
+  secondary.type = 'button';
+  secondary.className = 'auth-link-button landing-cta-secondary';
+  secondary.textContent = '▶  See How It Works';
+  secondary.addEventListener('click', () => router?.navigate('/login'));
+  ctas.append(primary, secondary);
 
-  const loginButton = document.createElement('button');
-  loginButton.type = 'button';
-  loginButton.className = 'auth-button landing-primary';
-  loginButton.textContent = 'Sign in';
-  loginButton.addEventListener('click', () => router?.navigate('/login'));
+  const social = document.createElement('section');
+  social.className = 'landing-social';
+  social.innerHTML = `
+    <div class="landing-avatars">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <div>
+      <p class="landing-stars">★★★★★</p>
+      <p class="landing-users">Join 50,000+ users building better habits</p>
+    </div>
+  `;
 
-  const registerButton = document.createElement('button');
-  registerButton.type = 'button';
-  registerButton.className = 'auth-link-button landing-secondary';
-  registerButton.textContent = 'Create Account';
-  registerButton.addEventListener('click', () => router?.navigate('/register'));
+  const preview = document.createElement('section');
+  preview.className = 'landing-preview';
+  preview.innerHTML = `
+    <div class="landing-preview-head">Good morning, Alex! ☀️</div>
+    <p class="landing-preview-sub">Keep going, you're doing great.</p>
+    <div class="landing-preview-days">
+      <span>✓</span><span>✓</span><span>✓</span><span class="active">4</span><span>5</span><span>6</span><span>7</span>
+    </div>
+    <h3 class="landing-preview-title">Today's Habits</h3>
+    <div class="landing-preview-card">
+      <span class="landing-preview-icon">🥤</span>
+      <div>
+        <p>Drink Water</p>
+        <small>8 glasses a day</small>
+      </div>
+      <strong>6/8</strong>
+    </div>
+    <div class="landing-preview-nav">
+      <span class="active">Today</span><span>Habits</span><span class="plus">+</span><span>Stats</span><span>Profile</span>
+    </div>
+  `;
 
-  actions.append(loginButton, registerButton);
-
-  const benefits = document.createElement('section');
-  benefits.className = 'landing-benefits';
-
-  const benefitData = [
-    {
-      title: 'Smart Templates',
-      body: 'Start instantly with curated habits like hydration, reading, and exercise.'
-    },
-    {
-      title: 'Daily Progress',
-      body: 'See what is done today with clear visual progress bars and streak signals.'
-    },
-    {
-      title: 'Calendar View',
-      body: 'Track consistency over time with highlighted completion days in your monthly calendar.'
-    },
-    {
-      title: 'Progress Insights',
-      body: 'Understand your completion trends and strongest habits with weekly analytics.'
-    }
-  ];
-
-  benefitData.forEach((item) => {
-    const card = document.createElement('article');
-    card.className = 'landing-benefit-card';
-    const h3 = document.createElement('h3');
-    h3.className = 'landing-benefit-title';
-    h3.textContent = item.title;
-    const p = document.createElement('p');
-    p.className = 'landing-benefit-text';
-    p.textContent = item.body;
-    card.append(h3, p);
-    benefits.append(card);
-  });
-
-  const cta = document.createElement('section');
-  cta.className = 'landing-cta';
-  const ctaTitle = document.createElement('h2');
-  ctaTitle.className = 'landing-cta-title';
-  ctaTitle.textContent = 'Small steps. Big change.';
-  const ctaText = document.createElement('p');
-  ctaText.className = 'landing-cta-text';
-  ctaText.textContent = 'Join now and turn your routine into momentum.';
-  const ctaButton = document.createElement('button');
-  ctaButton.type = 'button';
-  ctaButton.className = 'auth-button landing-primary';
-  ctaButton.textContent = 'Start tracking today';
-  ctaButton.addEventListener('click', () => router?.navigate('/register'));
-  cta.append(ctaTitle, ctaText, ctaButton);
-
-  hero.append(badge, title, subtitle, actions);
-  shell.append(hero, benefits, cta);
+  shell.append(top, pill, title, subtitle, ctas, social, preview);
   page.append(shell);
   container.replaceChildren(page);
 }
