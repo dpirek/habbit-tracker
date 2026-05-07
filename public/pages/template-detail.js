@@ -55,6 +55,23 @@ function createTopMenu(router) {
   return bar;
 }
 
+function dateKeyLocal(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function templateIconSvg(iconKey = '') {
+  const key = String(iconKey || '').toLowerCase();
+  const common = 'fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
+  if (key.includes('water')) return `<svg viewBox="0 0 24 24" ${common}><path d="M7 4h10l-1 15a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2L7 4z"/><path d="M12 10c1.8 1.7 2.5 2.8 2.5 4a2.5 2.5 0 0 1-5 0c0-1.2.7-2.3 2.5-4z"/></svg>`;
+  if (key.includes('exercise') || key.includes('workout')) return `<svg viewBox="0 0 24 24" ${common}><path d="M4 10h2v4H4zM18 10h2v4h-2z"/><path d="M6 9h2v6H6zM16 9h2v6h-2z"/><path d="M8 11h8v2H8z"/></svg>`;
+  if (key.includes('book') || key.includes('read')) return `<svg viewBox="0 0 24 24" ${common}><path d="M3 6a2 2 0 0 1 2-2h6v16H5a2 2 0 0 0-2 2V6z"/><path d="M21 6a2 2 0 0 0-2-2h-6v16h6a2 2 0 0 1 2 2V6z"/></svg>`;
+  if (key.includes('meditation') || key.includes('mindful')) return `<svg viewBox="0 0 24 24" ${common}><circle cx="12" cy="5" r="2"/><path d="M9 11l3-3 3 3"/><path d="M7 20l2.5-5h5L17 20"/></svg>`;
+  return `<svg viewBox="0 0 24 24" ${common}><path d="M12 3v18M3 12h18"/></svg>`;
+}
+
 export default async function renderTemplateDetailPage(container, router, params = {}) {
   if (!container) return;
   const templateId = Number(params.id);
@@ -78,15 +95,35 @@ export default async function renderTemplateDetailPage(container, router, params
   const header = el('header', 'tracker-header');
   header.append(el('h1', 'auth-title', 'Template Detail'), el('p', 'auth-subtitle', 'Review and confirm this habit template.'));
   const flash = el('p', 'auth-status');
-  const card = el('section', 'tracker-section');
-  const title = el('h2', 'tracker-section-title', 'Loading...');
-  const desc = el('p', 'tracker-card-text', '');
-  const meta = el('p', 'tracker-card-meta', '');
-  const confirm = el('button', 'auth-button', 'Use Template');
-  confirm.type = 'button';
-  card.append(title, desc, meta, confirm);
 
-  shell.append(createTopMenu(router), header, flash, card);
+  const hero = el('section', 'template-detail-hero');
+  const iconWrap = el('div', 'template-detail-icon');
+  const title = el('h2', 'template-detail-title', 'Loading...');
+  const meta = el('p', 'template-detail-meta', '');
+  hero.append(iconWrap, title, meta);
+
+  const progressCard = el('section', 'tracker-section template-detail-card');
+  progressCard.append(el('h3', 'template-detail-card-title', "Today's Progress"));
+  const progressPills = el('div', 'template-detail-pills');
+  progressCard.append(progressPills);
+
+  const calendarCard = el('section', 'tracker-section template-detail-card');
+  const calendarHead = el('div', 'tracker-habits-title-row');
+  calendarHead.append(el('h3', 'template-detail-card-title', 'Calendar'), el('span', 'template-detail-link', 'View all'));
+  const calendarMeta = el('p', 'tracker-card-meta', '');
+  const calendarMonth = el('p', 'template-detail-calendar-month', '');
+  const calendarDaysHead = el('div', 'template-detail-calendar-days');
+  ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].forEach((d) => calendarDaysHead.append(el('span', 'template-detail-calendar-day-label', d)));
+  const calendarGrid = el('div', 'template-detail-calendar-grid');
+  calendarCard.append(calendarHead, calendarMeta, calendarMonth, calendarDaysHead, calendarGrid);
+
+  const actionCard = el('section', 'template-detail-action');
+  const desc = el('p', 'tracker-card-text', '');
+  const confirm = el('button', 'auth-button template-detail-cta', 'Use Template');
+  confirm.type = 'button';
+  actionCard.append(desc, confirm);
+
+  shell.append(createTopMenu(router), header, flash, hero, progressCard, calendarCard, actionCard);
   mountDesktopLayout(page, shell, desktopSidebar);
   page.append(createMobileNav(router, 'habits'));
   container.replaceChildren(page);
@@ -141,7 +178,47 @@ export default async function renderTemplateDetailPage(container, router, params
 
     title.textContent = currentTemplate.title;
     desc.textContent = currentTemplate.description || 'No description';
-    meta.textContent = `${currentTemplate.frequency} • ${currentTemplate.target_count}${currentTemplate.unit ? ` ${currentTemplate.unit}` : ''}`;
+    meta.textContent = `${currentTemplate.target_count}${currentTemplate.unit ? ` ${currentTemplate.unit}` : ''} a day`;
+    calendarMeta.textContent = `${currentTemplate.frequency} schedule`;
+    progressCard.hidden = Number(currentTemplate.id) === 6;
+    const monthAnchor = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    calendarMonth.textContent = monthAnchor.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+
+    const start = (monthAnchor.getDay() + 6) % 7;
+    const daysInMonth = new Date(monthAnchor.getFullYear(), monthAnchor.getMonth() + 1, 0).getDate();
+    const today = new Date();
+    const highlighted = new Set();
+    for (let day = 1; day <= daysInMonth; day += 1) {
+      const d = new Date(monthAnchor.getFullYear(), monthAnchor.getMonth(), day);
+      if (currentTemplate.frequency === 'daily') {
+        highlighted.add(dateKeyLocal(d));
+      } else if (currentTemplate.frequency === 'weekly') {
+        if (d.getDay() === today.getDay()) highlighted.add(dateKeyLocal(d));
+      } else if (currentTemplate.frequency === 'monthly') {
+        if (day === today.getDate()) highlighted.add(dateKeyLocal(d));
+      }
+    }
+
+    calendarGrid.innerHTML = '';
+    for (let i = 0; i < start; i += 1) {
+      calendarGrid.append(el('span', 'template-detail-calendar-cell empty', ''));
+    }
+    for (let day = 1; day <= daysInMonth; day += 1) {
+      const d = new Date(monthAnchor.getFullYear(), monthAnchor.getMonth(), day);
+      const key = dateKeyLocal(d);
+      const cell = el('span', `template-detail-calendar-cell${highlighted.has(key) ? ' active' : ''}`, String(day));
+      if (d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear()) {
+        cell.classList.add('today');
+      }
+      calendarGrid.append(cell);
+    }
+
+    iconWrap.innerHTML = templateIconSvg(currentTemplate.icon || currentTemplate.title || '');
+    progressPills.innerHTML = '';
+    const target = Math.max(1, Number(currentTemplate.target_count || 1));
+    for (let i = 0; i < Math.min(target, 8); i += 1) {
+      progressPills.append(el('span', `template-detail-pill${i < Math.max(1, Math.floor(target * 0.7)) ? ' active' : ''}`, ''));
+    }
   } catch (_) {
     router?.navigate('/login');
   }
