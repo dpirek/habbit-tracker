@@ -1,6 +1,7 @@
 import DesktopSideMenu, { mountDesktopLayout } from '../components/shared/desktop-side-menu.js';
 import MobileTopMenu from '../components/shared/mobile-top-menu.js';
 import MobileBottomNav from '../components/shared/mobile-bottom-nav.js';
+import CalendarWidget from '../components/shared/calendar-widget.js';
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -17,13 +18,6 @@ async function api(path, options = {}) {
   const payload = await response.json().catch(() => null);
   if (!response.ok) throw new Error(payload?.error || `Request failed (${response.status})`);
   return payload?.data;
-}
-
-function dateKeyLocal(date) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
 }
 
 export default async function renderCalendarPage(container, router) {
@@ -44,75 +38,20 @@ export default async function renderCalendarPage(container, router) {
   header.append(el('h1', 'auth-title', 'Calendar'), el('p', 'auth-subtitle', 'Track your daily completions.'));
 
   const card = el('section', 'tracker-section calendar-card');
-  const top = el('div', 'calendar-top-row');
-  const monthTitle = el('h2', 'calendar-month-title', '');
-  const controls = el('div', 'calendar-controls');
-  const prevBtn = el('button', 'calendar-arrow', '‹');
-  const nextBtn = el('button', 'calendar-arrow', '›');
-  prevBtn.type = 'button';
-  nextBtn.type = 'button';
-  controls.append(prevBtn, nextBtn);
-  top.append(monthTitle, controls);
+  const calendarWidget = new CalendarWidget({
+    variant: 'default',
+    mode: 'done',
+    showControls: true,
+    monthAnchor: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+    markedDateKeys: new Set()
+  });
 
-  const daysHeader = el('div', 'calendar-days-header');
-  ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].forEach((d) => daysHeader.append(el('span', 'calendar-day-label', d)));
-  const grid = el('div', 'calendar-grid');
-
-  card.append(top, daysHeader, grid);
+  card.append(calendarWidget);
   shell.append(new MobileTopMenu({ router, mode: 'back', backPath: '/home' }), header, card);
   mountDesktopLayout(page, shell, desktopSidebar);
   page.append(new MobileBottomNav({ router, activeKey: 'today' }));
   container.replaceChildren(page);
 
-  const state = {
-    monthAnchor: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-    completedDateKeys: new Set(),
-  };
-
-  function renderMonth() {
-    const year = state.monthAnchor.getFullYear();
-    const month = state.monthAnchor.getMonth();
-    const today = new Date();
-    monthTitle.textContent = state.monthAnchor.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
-
-    grid.innerHTML = '';
-    const firstDay = new Date(year, month, 1);
-    const start = (firstDay.getDay() + 6) % 7;
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-    for (let i = 0; i < start; i += 1) {
-      grid.append(el('span', 'calendar-cell empty'));
-    }
-
-    for (let day = 1; day <= daysInMonth; day += 1) {
-      const current = new Date(year, month, day);
-      const key = dateKeyLocal(current);
-      const cell = el('span', 'calendar-cell', String(day));
-      const done = state.completedDateKeys.has(key);
-      const isToday = current.getFullYear() === today.getFullYear()
-        && current.getMonth() === today.getMonth()
-        && current.getDate() === today.getDate();
-
-      if (done) {
-        cell.classList.add('done');
-        cell.textContent = '✓';
-      }
-      if (isToday) {
-        cell.classList.add('today');
-        if (!done) cell.textContent = String(day);
-      }
-      grid.append(cell);
-    }
-  }
-
-  prevBtn.addEventListener('click', () => {
-    state.monthAnchor = new Date(state.monthAnchor.getFullYear(), state.monthAnchor.getMonth() - 1, 1);
-    renderMonth();
-  });
-  nextBtn.addEventListener('click', () => {
-    state.monthAnchor = new Date(state.monthAnchor.getFullYear(), state.monthAnchor.getMonth() + 1, 1);
-    renderMonth();
-  });
 
   try {
     const session = await api('/api/auth/user');
@@ -133,8 +72,7 @@ export default async function renderCalendarPage(container, router) {
         if (key) completed.add(key);
       });
     });
-    state.completedDateKeys = completed;
-    renderMonth();
+    calendarWidget.setMarkedDateKeys(completed);
   } catch (_) {
     router?.navigate('/login');
   }

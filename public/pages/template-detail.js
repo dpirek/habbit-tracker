@@ -1,6 +1,7 @@
 import DesktopSideMenu, { mountDesktopLayout } from '../components/shared/desktop-side-menu.js';
 import MobileTopMenu from '../components/shared/mobile-top-menu.js';
 import MobileBottomNav from '../components/shared/mobile-bottom-nav.js';
+import CalendarWidget from '../components/shared/calendar-widget.js';
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -75,11 +76,14 @@ export default async function renderTemplateDetailPage(container, router, params
   const calendarHead = el('div', 'tracker-habits-title-row');
   calendarHead.append(el('h3', 'template-detail-card-title', 'Calendar'), el('span', 'template-detail-link', 'View all'));
   const calendarMeta = el('p', 'tracker-card-meta', '');
-  const calendarMonth = el('p', 'template-detail-calendar-month', '');
-  const calendarDaysHead = el('div', 'template-detail-calendar-days');
-  ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].forEach((d) => calendarDaysHead.append(el('span', 'template-detail-calendar-day-label', d)));
-  const calendarGrid = el('div', 'template-detail-calendar-grid');
-  calendarCard.append(calendarHead, calendarMeta, calendarMonth, calendarDaysHead, calendarGrid);
+  const templateCalendarWidget = new CalendarWidget({
+    variant: 'template',
+    mode: 'highlight',
+    showControls: false,
+    monthAnchor: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+    markedDateKeys: new Set()
+  });
+  calendarCard.append(calendarHead, calendarMeta, templateCalendarWidget);
 
   const actionCard = el('section', 'template-detail-action');
   const desc = el('p', 'tracker-card-text', '');
@@ -146,9 +150,6 @@ export default async function renderTemplateDetailPage(container, router, params
     calendarMeta.textContent = `${currentTemplate.frequency} schedule`;
     progressCard.hidden = Number(currentTemplate.id) === 6;
     const monthAnchor = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-    calendarMonth.textContent = monthAnchor.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
-
-    const start = (monthAnchor.getDay() + 6) % 7;
     const daysInMonth = new Date(monthAnchor.getFullYear(), monthAnchor.getMonth() + 1, 0).getDate();
     const today = new Date();
     const highlighted = new Set();
@@ -163,19 +164,8 @@ export default async function renderTemplateDetailPage(container, router, params
       }
     }
 
-    calendarGrid.innerHTML = '';
-    for (let i = 0; i < start; i += 1) {
-      calendarGrid.append(el('span', 'template-detail-calendar-cell empty', ''));
-    }
-    for (let day = 1; day <= daysInMonth; day += 1) {
-      const d = new Date(monthAnchor.getFullYear(), monthAnchor.getMonth(), day);
-      const key = dateKeyLocal(d);
-      const cell = el('span', `template-detail-calendar-cell${highlighted.has(key) ? ' active' : ''}`, String(day));
-      if (d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear()) {
-        cell.classList.add('today');
-      }
-      calendarGrid.append(cell);
-    }
+    templateCalendarWidget.setMonthAnchor(monthAnchor);
+    templateCalendarWidget.setMarkedDateKeys(highlighted);
 
     iconWrap.innerHTML = templateIconSvg(currentTemplate.icon || currentTemplate.title || '');
     progressPills.innerHTML = '';
