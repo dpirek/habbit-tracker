@@ -21,18 +21,6 @@ function respondJson(res, data, statusCode = 200) {
   res.end(JSON.stringify(data));
 }
 
-// function static(res, url, type = 'text/plain') {
-//   res.statusCode = 200;
-//   res.writeHead(200, {'Content-Type': contentType(url)});
-//   try {
-//     fs.accessSync(__dirname + url, fs.constants.R_OK);
-//   } catch(err) {
-//     res.statusCode = 404;
-//     return res.end('404 Not Found');
-//   }
-//   res.end(fs.readFileSync(__dirname + url));
-// }
-
 function serverStatic(req, res) {
   // ignore .well-known requests
   if (req.url.startsWith('/.well-known/')) {
@@ -127,7 +115,6 @@ async function parseBody(req) {
 
 module.exports = {
   redirect,
-  //static,
   notFound,
   notFoundJson,
   notAuthorizedJson,
