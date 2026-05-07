@@ -1,4 +1,5 @@
-import { createDesktopSidebar, mountDesktopLayout } from './desktop-sidebar.js';
+import DesktopSideMenu, { mountDesktopLayout } from '../components/shared/desktop-side-menu.js';
+import MobileTopMenu from '../components/shared/mobile-top-menu.js';
 import MobileBottomNav from '../components/shared/mobile-bottom-nav.js';
 
 function el(tag, className, text) {
@@ -18,23 +19,6 @@ async function api(path, options = {}) {
   return payload?.data;
 }
 
- function createTopMenu(router) {
-  const bar = el('div', 'mobile-top-menu');
-  const left = el('button', 'mobile-top-menu-btn');
-  left.type = 'button';
-  left.setAttribute('aria-label', 'Back to Home');
-  left.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>';
-  left.addEventListener('click', () => router?.navigate('/home'));
-
-  const right = el('button', 'mobile-top-menu-btn');
-  right.type = 'button';
-  right.setAttribute('aria-label', 'More');
-  right.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="6" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="18" cy="12" r="1.8"/></svg>';
-
-  bar.append(left, right);
-  return bar;
-}
-
 function dateKeyLocal(date) {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -47,7 +31,7 @@ export default async function renderCalendarPage(container, router) {
 
   const page = el('section', 'tracker-page');
   const shell = el('div', 'tracker-shell');
-  const desktopSidebar = createDesktopSidebar({
+  const desktopSidebar = new DesktopSideMenu({
     router,
     activeKey: 'calendar',
     userName: 'User',
@@ -75,7 +59,7 @@ export default async function renderCalendarPage(container, router) {
   const grid = el('div', 'calendar-grid');
 
   card.append(top, daysHeader, grid);
-  shell.append(createTopMenu(router), header, card);
+  shell.append(new MobileTopMenu({ router, mode: 'back', backPath: '/home' }), header, card);
   mountDesktopLayout(page, shell, desktopSidebar);
   page.append(new MobileBottomNav({ router, activeKey: 'today' }));
   container.replaceChildren(page);

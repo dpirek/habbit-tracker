@@ -1,4 +1,5 @@
-import { createDesktopSidebar, mountDesktopLayout } from './desktop-sidebar.js';
+import DesktopSideMenu, { mountDesktopLayout } from '../components/shared/desktop-side-menu.js';
+import MobileTopMenu from '../components/shared/mobile-top-menu.js';
 import MobileBottomNav from '../components/shared/mobile-bottom-nav.js';
 
 function el(tag, className, text) {
@@ -16,23 +17,6 @@ async function api(path, options = {}) {
   const payload = await response.json().catch(() => null);
   if (!response.ok) throw new Error(payload?.error || `Request failed (${response.status})`);
   return payload?.data;
-}
-
- function createTopMenu(router) {
-  const bar = el('div', 'mobile-top-menu');
-  const left = el('button', 'mobile-top-menu-btn');
-  left.type = 'button';
-  left.setAttribute('aria-label', 'Back to Home');
-  left.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>';
-  left.addEventListener('click', () => router?.navigate('/home'));
-
-  const right = el('button', 'mobile-top-menu-btn');
-  right.type = 'button';
-  right.setAttribute('aria-label', 'Notifications');
-  right.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 17H5.5a1.5 1.5 0 0 1-1.2-2.4L5 13.7V10a7 7 0 1 1 14 0v3.7l.7.9a1.5 1.5 0 0 1-1.2 2.4H17"/><path d="M9.5 19a2.5 2.5 0 0 0 5 0"/></svg>';
-
-  bar.append(left, right);
-  return bar;
 }
 
 function dateKeyLocal(date) {
@@ -76,7 +60,7 @@ export default async function renderProgressPage(container, router) {
 
   const page = el('section', 'tracker-page');
   const shell = el('div', 'tracker-shell');
-  const desktopSidebar = createDesktopSidebar({
+  const desktopSidebar = new DesktopSideMenu({
     router,
     activeKey: 'stats',
     userName: 'User',
@@ -122,7 +106,7 @@ export default async function renderProgressPage(container, router) {
   const breakdownList = el('div', 'progress-breakdown-list');
   breakdown.append(breakdownList);
 
-  shell.append(createTopMenu(router), header, tabs, overview, chartSection, breakdown);
+  shell.append(new MobileTopMenu({ router, mode: 'back', backPath: '/home' }), header, tabs, overview, chartSection, breakdown);
   mountDesktopLayout(page, shell, desktopSidebar);
   page.append(new MobileBottomNav({ router, activeKey: 'stats' }));
   container.replaceChildren(page);

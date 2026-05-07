@@ -1,4 +1,5 @@
-import { createDesktopSidebar, mountDesktopLayout } from './desktop-sidebar.js';
+import DesktopSideMenu, { mountDesktopLayout } from '../components/shared/desktop-side-menu.js';
+import MobileTopMenu from '../components/shared/mobile-top-menu.js';
 import MobileBottomNav from '../components/shared/mobile-bottom-nav.js';
 
 function el(tag, className, text) {
@@ -74,72 +75,6 @@ function habitCard(habit, progressValue = 0, onOpenEntries) {
   return card;
 }
 
- function createTopMenu({ router, onAdmin, onLogout }) {
-  const bar = el('div', 'mobile-top-menu');
-  const menuBtn = el('button', 'mobile-top-menu-btn mobile-top-menu-toggle');
-  menuBtn.type = 'button';
-  menuBtn.setAttribute('aria-label', 'Open menu');
-  menuBtn.setAttribute('aria-expanded', 'false');
-  menuBtn.innerHTML = '<span class="hamburger-icon" aria-hidden="true"><span></span><span></span><span></span></span>';
-
-  const right = el('button', 'mobile-top-menu-btn');
-  right.type = 'button';
-  right.setAttribute('aria-label', 'Notifications');
-  right.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 17H5.5a1.5 1.5 0 0 1-1.2-2.4L5 13.7V10a7 7 0 1 1 14 0v3.7l.7.9a1.5 1.5 0 0 1-1.2 2.4H17"/><path d="M9.5 19a2.5 2.5 0 0 0 5 0"/></svg>';
-
-  const overlay = el('div', 'mobile-drawer-overlay');
-  const drawer = el('aside', 'mobile-drawer');
-
-  const makeItem = (label, onClick, active = false) => {
-    const item = el('button', `mobile-drawer-item${active ? ' active' : ''}`, label);
-    item.type = 'button';
-    item.addEventListener('click', async () => {
-      closeMenu();
-      await onClick?.();
-    });
-    return item;
-  };
-
-  const items = el('div', 'mobile-drawer-items');
-  items.append(
-    makeItem('Today', () => router?.navigate('/home'), true),
-    makeItem('Habits', () => router?.navigate('/habits')),
-    makeItem('Stats', () => router?.navigate('/progress')),
-    makeItem('Calendar', () => router?.navigate('/calendar')),
-    makeItem('Profile', () => router?.navigate('/profile')),
-    makeItem('Settings', () => onAdmin?.())
-  );
-
-  const logoutAction = el('button', 'mobile-drawer-logout', 'Logout');
-  logoutAction.type = 'button';
-  logoutAction.addEventListener('click', async () => {
-    closeMenu();
-    await onLogout?.();
-  });
-  drawer.append(items, logoutAction);
-
-  const openMenu = () => {
-    bar.classList.add('menu-open');
-    menuBtn.setAttribute('aria-expanded', 'true');
-    menuBtn.setAttribute('aria-label', 'Close menu');
-  };
-
-  const closeMenu = () => {
-    bar.classList.remove('menu-open');
-    menuBtn.setAttribute('aria-expanded', 'false');
-    menuBtn.setAttribute('aria-label', 'Open menu');
-  };
-
-  menuBtn.addEventListener('click', () => {
-    if (bar.classList.contains('menu-open')) closeMenu();
-    else openMenu();
-  });
-  overlay.addEventListener('click', closeMenu);
-
-  bar.append(menuBtn, right, overlay, drawer);
-  return bar;
-}
-
 function createWeekStrip() {
   const wrap = el('div', 'week-strip');
   const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -171,7 +106,7 @@ export default async function renderAppHomePage(container, router) {
 
   const page = el('section', 'tracker-page');
   const shell = el('div', 'tracker-shell');
-  const desktopSidebar = createDesktopSidebar({
+  const desktopSidebar = new DesktopSideMenu({
     router,
     activeKey: 'today',
     userName: 'User',
@@ -203,8 +138,10 @@ export default async function renderAppHomePage(container, router) {
 
   habitsSection.append(habitsList);
   grid.append(habitsSection);
-  shell.append(createTopMenu({
+  shell.append(new MobileTopMenu({
     router,
+    mode: 'menu',
+    activeKey: 'today',
     onAdmin: () => router?.navigate('/admin'),
     onLogout: async () => {
       await api('/api/auth/sign-out', { method: 'POST' });
