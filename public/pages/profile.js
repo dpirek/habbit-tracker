@@ -86,13 +86,7 @@ export default async function renderProfilePage(container, router) {
       router?.navigate('/login');
     }
   });
-
-  const header = el('header', 'tracker-header');
-  header.append(
-    el('h1', 'auth-title', 'Profile'),
-    el('p', 'auth-subtitle', 'Your account and progress settings.')
-  );
-
+  
   const flash = el('p', 'auth-status');
   const hero = el('section', 'profile-hero');
   const avatar = el('div', 'profile-avatar', '👤');
@@ -124,7 +118,7 @@ export default async function renderProfilePage(container, router) {
   list.append(row1, row2, row3);
   settings.append(list);
 
-  shell.append(createTopMenu(router), header, flash, hero, overview, settings);
+  shell.append(createTopMenu(router), flash, hero, overview, settings);
   mountDesktopLayout(page, shell, desktopSidebar);
   page.append(createMobileNav(router, 'profile'));
   container.replaceChildren(page);
