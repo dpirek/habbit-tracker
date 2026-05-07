@@ -1,4 +1,5 @@
 import { createDesktopSidebar, mountDesktopLayout } from './desktop-sidebar.js';
+import MobileBottomNav from '../components/shared/mobile-bottom-nav.js';
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -17,30 +18,7 @@ async function api(path, options = {}) {
   return payload?.data;
 }
 
-function createMobileNav(router, activeKey = 'habits') {
-  const nav = el('nav', 'mobile-bottom-nav');
-  nav.setAttribute('aria-label', 'Mobile navigation');
-  const item = (key, label, onClick) => {
-    const btn = el('button', `mobile-nav-item${activeKey === key ? ' active' : ''}`);
-    btn.type = 'button';
-    btn.innerHTML = `<span>${label}</span>`;
-    btn.addEventListener('click', onClick);
-    return btn;
-  };
-  const center = el('button', 'mobile-nav-center', '+');
-  center.type = 'button';
-  center.addEventListener('click', () => router?.navigate('/habits'));
-  nav.append(
-    item('today', 'Today', () => router?.navigate('/home')),
-    item('habits', 'Habits', () => router?.navigate('/habits')),
-    center,
-    item('stats', 'Stats', () => router?.navigate('/progress')),
-    item('profile', 'Profile', () => router?.navigate('/profile'))
-  );
-  return nav;
-}
-
-function createTopMenu(router) {
+ function createTopMenu(router) {
   const bar = el('div', 'mobile-top-menu');
   const left = el('button', 'mobile-top-menu-btn');
   left.type = 'button';
@@ -125,7 +103,7 @@ export default async function renderTemplateDetailPage(container, router, params
 
   shell.append(createTopMenu(router), header, flash, hero, progressCard, calendarCard, actionCard);
   mountDesktopLayout(page, shell, desktopSidebar);
-  page.append(createMobileNav(router, 'habits'));
+  page.append(new MobileBottomNav({ router, activeKey: 'habits' }));
   container.replaceChildren(page);
 
   let currentUser = null;
