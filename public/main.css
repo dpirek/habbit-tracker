@@ -545,6 +545,29 @@ body {
   gap: 10px;
 }
 
+.template-card-head {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.template-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: #eef1ff;
+  color: #5f54f2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.template-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
 .habits-custom-button {
   margin-top: 16px;
 }
@@ -1027,4 +1050,5 @@ body {
   .tracker-shell { border-radius: 18px; padding: 16px; }
   .auth-subtitle { font-size: 16px; }
   .mobile-bottom-nav { display: flex; }
+  .habits-custom-button { width: 100%; }
 }

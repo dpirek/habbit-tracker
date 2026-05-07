@@ -74,6 +74,30 @@ function createTopMenu(router) {
   return bar;
 }
 
+function templateIconSvg(iconKey = '') {
+  const key = String(iconKey || '').toLowerCase();
+  const common = 'fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
+  if (key.includes('water')) {
+    return `<svg viewBox="0 0 24 24" ${common}><path d="M7 4h10l-1 15a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2L7 4z"/><path d="M8 4h8"/><path d="M12 10c1.8 1.7 2.5 2.8 2.5 4a2.5 2.5 0 0 1-5 0c0-1.2.7-2.3 2.5-4z"/></svg>`;
+  }
+  if (key.includes('exercise') || key.includes('workout')) {
+    return `<svg viewBox="0 0 24 24" ${common}><path d="M4 10h2v4H4zM18 10h2v4h-2z"/><path d="M6 9h2v6H6zM16 9h2v6h-2z"/><path d="M8 11h8v2H8z"/></svg>`;
+  }
+  if (key.includes('book') || key.includes('read')) {
+    return `<svg viewBox="0 0 24 24" ${common}><path d="M3 6a2 2 0 0 1 2-2h6v16H5a2 2 0 0 0-2 2V6z"/><path d="M21 6a2 2 0 0 0-2-2h-6v16h6a2 2 0 0 1 2 2V6z"/></svg>`;
+  }
+  if (key.includes('meditation') || key.includes('mindful')) {
+    return `<svg viewBox="0 0 24 24" ${common}><circle cx="12" cy="5" r="2"/><path d="M9 11l3-3 3 3"/><path d="M7 20l2.5-5h5L17 20"/><path d="M5 14h4m6 0h4"/></svg>`;
+  }
+  if (key.includes('sleep')) {
+    return `<svg viewBox="0 0 24 24" ${common}><path d="M4 14h16v5H4z"/><path d="M6 14V9h12v5"/><path d="M7 6h2M11 6h2M15 6h2"/></svg>`;
+  }
+  if (key.includes('nutrition') || key.includes('apple')) {
+    return `<svg viewBox="0 0 24 24" ${common}><path d="M12 7c3.5 0 6 2.7 6 6.3C18 17.5 15.5 20 12 20s-6-2.5-6-6.7C6 9.7 8.5 7 12 7z"/><path d="M12 7c0-2 1.2-3.4 3.2-3.8"/><path d="M12 7c0-1.7-1.2-2.7-2.7-3"/></svg>`;
+  }
+  return `<svg viewBox="0 0 24 24" ${common}><path d="M12 3v18M3 12h18"/></svg>`;
+}
+
 export default async function renderHabitsPage(container, router) {
   if (!container) return;
 
@@ -129,11 +153,12 @@ export default async function renderHabitsPage(container, router) {
     templatesGrid.innerHTML = '';
     templates.forEach((template) => {
       const card = el('article', 'template-card');
-      card.append(
-        el('h3', 'tracker-card-title', template.title),
-        el('p', 'tracker-card-text', template.description || 'No description'),
-        el('p', 'tracker-card-meta', `${template.frequency} • ${template.target_count}${template.unit ? ` ${template.unit}` : ''}`)
-      );
+      const head = el('div', 'template-card-head');
+      const icon = el('div', 'template-icon');
+      icon.innerHTML = templateIconSvg(template.icon || template.title || '');
+      const title = el('h3', 'tracker-card-title', template.title);
+      head.append(icon, title);
+      card.append(head, el('p', 'tracker-card-text', template.description || 'No description'), el('p', 'tracker-card-meta', `${template.frequency} • ${template.target_count}${template.unit ? ` ${template.unit}` : ''}`));
 
       const addButton = el('button', 'auth-button', 'Use Template');
       addButton.type = 'button';
