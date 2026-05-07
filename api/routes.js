@@ -1,24 +1,10 @@
 const { route } = require('../utils/router');
-const {
-  listUsers,
-  createUser,
-  signIn,
-  signOut,
-  getAuthUser,
-  listCategories,
-  listHabitTemplates,
-  createCategory,
-  listHabits,
-  createHabit,
-  getHabit,
-  updateHabit,
-  deleteHabit,
-  listEntries,
-  createEntry,
-  updateEntry,
-  deleteEntry,
-  getOpenApi,
-} = require('./handlers');
+const { listUsers, createUser } = require('./handlers.users');
+const { signIn, signOut, getAuthUser } = require('./handlers.auth');
+const { listCategories, listHabitTemplates, createCategory } = require('./handlers.categories');
+const { listHabits, createHabit, getHabit, updateHabit, deleteHabit } = require('./handlers.habits');
+const { listEntries, createEntry, updateEntry, deleteEntry } = require('./handlers.entries');
+const { getOpenApi } = require('./handlers.openapi');
 
 const apiRoutes = route();
 
