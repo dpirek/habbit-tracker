@@ -1,3 +1,5 @@
+import { createDesktopSidebar, mountDesktopLayout } from './desktop-sidebar.js';
+
 function el(tag, className, text) {
   const node = document.createElement(tag);
   if (className) node.className = className;
@@ -111,6 +113,15 @@ export default async function renderProgressPage(container, router) {
 
   const page = el('section', 'tracker-page');
   const shell = el('div', 'tracker-shell');
+  const desktopSidebar = createDesktopSidebar({
+    router,
+    activeKey: 'stats',
+    userName: 'User',
+    onLogout: async () => {
+      await api('/api/auth/sign-out', { method: 'POST' });
+      router?.navigate('/login');
+    }
+  });
 
   const header = el('header', 'tracker-header');
   header.append(
@@ -149,7 +160,8 @@ export default async function renderProgressPage(container, router) {
   breakdown.append(breakdownList);
 
   shell.append(createTopMenu(router), header, tabs, overview, chartSection, breakdown);
-  page.append(shell, createMobileNav(router, 'stats'));
+  mountDesktopLayout(page, shell, desktopSidebar);
+  page.append(createMobileNav(router, 'stats'));
   container.replaceChildren(page);
 
   try {
@@ -157,6 +169,10 @@ export default async function renderProgressPage(container, router) {
     const users = await api('/api/users');
     const currentUser = users.find((u) => u.username === session.username) || null;
     if (!currentUser) throw new Error('User record not found');
+    const desktopUser = desktopSidebar.querySelector('[data-desktop-username="true"]');
+    const desktopAvatar = desktopSidebar.querySelector('.desktop-side-avatar');
+    if (desktopUser) desktopUser.textContent = currentUser.username;
+    if (desktopAvatar) desktopAvatar.textContent = String(currentUser.username || 'U').slice(0, 1).toUpperCase();
 
     const habits = await api(`/api/habits?user_id=${currentUser.id}`);
     const habitWithEntries = await Promise.all(

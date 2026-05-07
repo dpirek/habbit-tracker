@@ -1,3 +1,5 @@
+import { createDesktopSidebar, mountDesktopLayout } from './desktop-sidebar.js';
+
 function el(tag, className, text) {
   const node = document.createElement(tag);
   if (className) node.className = className;
@@ -111,34 +113,69 @@ function createMobileNav(router, activeKey = 'today') {
   return nav;
 }
 
-function createTopMenu({ onAdmin, onLogout }) {
+function createTopMenu({ router, onAdmin, onLogout }) {
   const bar = el('div', 'mobile-top-menu');
-  const menu = el('details', 'mobile-top-menu-dropdown');
-  const trigger = el('summary', 'mobile-top-menu-btn');
-  trigger.setAttribute('aria-label', 'Open menu');
-  trigger.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg>';
-  const panel = el('div', 'mobile-top-menu-panel');
-  const adminAction = el('button', 'mobile-top-menu-item', 'Admin');
-  adminAction.type = 'button';
-  adminAction.addEventListener('click', () => {
-    menu.removeAttribute('open');
-    onAdmin?.();
-  });
-  const logoutAction = el('button', 'mobile-top-menu-item', 'Logout');
-  logoutAction.type = 'button';
-  logoutAction.addEventListener('click', () => {
-    menu.removeAttribute('open');
-    onLogout?.();
-  });
-  panel.append(adminAction, logoutAction);
-  menu.append(trigger, panel);
+  const menuBtn = el('button', 'mobile-top-menu-btn mobile-top-menu-toggle');
+  menuBtn.type = 'button';
+  menuBtn.setAttribute('aria-label', 'Open menu');
+  menuBtn.setAttribute('aria-expanded', 'false');
+  menuBtn.innerHTML = '<span class="hamburger-icon" aria-hidden="true"><span></span><span></span><span></span></span>';
 
   const right = el('button', 'mobile-top-menu-btn');
   right.type = 'button';
   right.setAttribute('aria-label', 'Notifications');
   right.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 17H5.5a1.5 1.5 0 0 1-1.2-2.4L5 13.7V10a7 7 0 1 1 14 0v3.7l.7.9a1.5 1.5 0 0 1-1.2 2.4H17"/><path d="M9.5 19a2.5 2.5 0 0 0 5 0"/></svg>';
 
-  bar.append(menu, right);
+  const overlay = el('div', 'mobile-drawer-overlay');
+  const drawer = el('aside', 'mobile-drawer');
+
+  const makeItem = (label, onClick, active = false) => {
+    const item = el('button', `mobile-drawer-item${active ? ' active' : ''}`, label);
+    item.type = 'button';
+    item.addEventListener('click', async () => {
+      closeMenu();
+      await onClick?.();
+    });
+    return item;
+  };
+
+  const items = el('div', 'mobile-drawer-items');
+  items.append(
+    makeItem('Today', () => router?.navigate('/home'), true),
+    makeItem('Habits', () => router?.navigate('/habits')),
+    makeItem('Stats', () => router?.navigate('/progress')),
+    makeItem('Calendar', () => router?.navigate('/calendar')),
+    makeItem('Profile', () => router?.navigate('/profile')),
+    makeItem('Settings', () => onAdmin?.())
+  );
+
+  const logoutAction = el('button', 'mobile-drawer-logout', 'Logout');
+  logoutAction.type = 'button';
+  logoutAction.addEventListener('click', async () => {
+    closeMenu();
+    await onLogout?.();
+  });
+  drawer.append(items, logoutAction);
+
+  const openMenu = () => {
+    bar.classList.add('menu-open');
+    menuBtn.setAttribute('aria-expanded', 'true');
+    menuBtn.setAttribute('aria-label', 'Close menu');
+  };
+
+  const closeMenu = () => {
+    bar.classList.remove('menu-open');
+    menuBtn.setAttribute('aria-expanded', 'false');
+    menuBtn.setAttribute('aria-label', 'Open menu');
+  };
+
+  menuBtn.addEventListener('click', () => {
+    if (bar.classList.contains('menu-open')) closeMenu();
+    else openMenu();
+  });
+  overlay.addEventListener('click', closeMenu);
+
+  bar.append(menuBtn, right, overlay, drawer);
   return bar;
 }
 
@@ -173,6 +210,15 @@ export default async function renderAppHomePage(container, router) {
 
   const page = el('section', 'tracker-page');
   const shell = el('div', 'tracker-shell');
+  const desktopSidebar = createDesktopSidebar({
+    router,
+    activeKey: 'today',
+    userName: 'User',
+    onLogout: async () => {
+      await api('/api/auth/sign-out', { method: 'POST' });
+      router?.navigate('/login');
+    }
+  });
 
   const header = el('header', 'tracker-header');
   const welcomeTitle = el('h1', 'auth-title', 'Welcome');
@@ -197,13 +243,15 @@ export default async function renderAppHomePage(container, router) {
   habitsSection.append(habitsList);
   grid.append(habitsSection);
   shell.append(createTopMenu({
+    router,
     onAdmin: () => router?.navigate('/admin'),
     onLogout: async () => {
       await api('/api/auth/sign-out', { method: 'POST' });
       router?.navigate('/login');
     }
   }), header, flash, grid);
-  page.append(shell, createMobileNav(router, 'today'));
+  mountDesktopLayout(page, shell, desktopSidebar);
+  page.append(createMobileNav(router, 'today'));
   container.replaceChildren(page);
 
   const state = { currentUser: null, categories: [], habits: [], todayProgress: new Map() };
@@ -246,6 +294,10 @@ export default async function renderAppHomePage(container, router) {
     const users = await api('/api/users');
     state.currentUser = users.find((u) => u.username === session.username) || null;
     if (!state.currentUser) return setFlash('User record not found for session', true);
+    const desktopUser = desktopSidebar.querySelector('[data-desktop-username="true"]');
+    const desktopAvatar = desktopSidebar.querySelector('.desktop-side-avatar');
+    if (desktopUser) desktopUser.textContent = state.currentUser.username;
+    if (desktopAvatar) desktopAvatar.textContent = String(state.currentUser.username || 'U').slice(0, 1).toUpperCase();
     welcomeTitle.textContent = `Good morning, ${state.currentUser.username}!`;
     await loadHabits();
   } catch (_) {

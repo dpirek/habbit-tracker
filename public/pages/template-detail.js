@@ -20,40 +20,23 @@ async function api(path, options = {}) {
 function createMobileNav(router, activeKey = 'habits') {
   const nav = el('nav', 'mobile-bottom-nav');
   nav.setAttribute('aria-label', 'Mobile navigation');
-
-  const iconMarkup = (name) => {
-    const paths = {
-      home: '<path d="M3 10.5L12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/>',
-      habits: '<rect x="4" y="4.5" width="16" height="15.5" rx="3"/><path d="M8 2.5v4M16 2.5v4M7.5 10.5h9"/>',
-      stats: '<path d="M5 19V9"/><path d="M10 19V5"/><path d="M15 19v-7"/><path d="M20 19V12"/>',
-      profile: '<circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.8-3.4 4-5 7-5s5.2 1.6 7 5"/>'
-    };
-    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[name] || ''}</svg>`;
-  };
-
-  const item = (key, label, iconName, onClick) => {
+  const item = (key, label, onClick) => {
     const btn = el('button', `mobile-nav-item${activeKey === key ? ' active' : ''}`);
     btn.type = 'button';
-    btn.innerHTML = `<span class="mobile-nav-icon">${iconMarkup(iconName)}</span><span>${label}</span>`;
+    btn.innerHTML = `<span>${label}</span>`;
     btn.addEventListener('click', onClick);
     return btn;
   };
-
-  const center = el('button', 'mobile-nav-center');
+  const center = el('button', 'mobile-nav-center', '+');
   center.type = 'button';
-  center.textContent = '+';
-  center.addEventListener('click', () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-
+  center.addEventListener('click', () => router?.navigate('/habits'));
   nav.append(
-    item('today', 'Today', 'home', () => router?.navigate('/home')),
-    item('habits', 'Habits', 'habits', () => router?.navigate('/habits')),
+    item('today', 'Today', () => router?.navigate('/home')),
+    item('habits', 'Habits', () => router?.navigate('/habits')),
     center,
-    item('stats', 'Stats', 'stats', () => router?.navigate('/progress')),
-    item('profile', 'Profile', 'profile', () => router?.navigate('/profile'))
+    item('stats', 'Stats', () => router?.navigate('/progress')),
+    item('profile', 'Profile', () => router?.navigate('/profile'))
   );
-
   return nav;
 }
 
@@ -61,21 +44,24 @@ function createTopMenu(router) {
   const bar = el('div', 'mobile-top-menu');
   const left = el('button', 'mobile-top-menu-btn');
   left.type = 'button';
-  left.setAttribute('aria-label', 'Back to Home');
+  left.setAttribute('aria-label', 'Back to Habits');
   left.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>';
-  left.addEventListener('click', () => router?.navigate('/home'));
-
+  left.addEventListener('click', () => router?.navigate('/habits'));
   const right = el('button', 'mobile-top-menu-btn');
   right.type = 'button';
   right.setAttribute('aria-label', 'Notifications');
   right.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 17H5.5a1.5 1.5 0 0 1-1.2-2.4L5 13.7V10a7 7 0 1 1 14 0v3.7l.7.9a1.5 1.5 0 0 1-1.2 2.4H17"/><path d="M9.5 19a2.5 2.5 0 0 0 5 0"/></svg>';
-
   bar.append(left, right);
   return bar;
 }
 
-export default async function renderHabitsPage(container, router) {
+export default async function renderTemplateDetailPage(container, router, params = {}) {
   if (!container) return;
+  const templateId = Number(params.id);
+  if (!Number.isInteger(templateId) || templateId <= 0) {
+    router?.navigate('/habits');
+    return;
+  }
 
   const page = el('section', 'tracker-page');
   const shell = el('div', 'tracker-shell');
@@ -90,57 +76,72 @@ export default async function renderHabitsPage(container, router) {
   });
 
   const header = el('header', 'tracker-header');
-  header.append(
-    el('h1', 'auth-title', 'Add New Habit'),
-    el('p', 'auth-subtitle', 'Pick from templates or create your own.')
-  );
-
+  header.append(el('h1', 'auth-title', 'Template Detail'), el('p', 'auth-subtitle', 'Review and confirm this habit template.'));
   const flash = el('p', 'auth-status');
-  const setFlash = (message, error = false) => {
-    flash.textContent = message || '';
-    flash.dataset.error = message ? String(error) : '';
-  };
+  const card = el('section', 'tracker-section');
+  const title = el('h2', 'tracker-section-title', 'Loading...');
+  const desc = el('p', 'tracker-card-text', '');
+  const meta = el('p', 'tracker-card-meta', '');
+  const confirm = el('button', 'auth-button', 'Use Template');
+  confirm.type = 'button';
+  card.append(title, desc, meta, confirm);
 
-  const templateSection = el('section');
-  templateSection.append(el('h2', 'tracker-section-title', 'Habit Templates'));
-  const customNavBtn = el('button', 'auth-button', 'Create Custom Habit');
-  customNavBtn.type = 'button';
-  customNavBtn.addEventListener('click', () => router?.navigate('/habits/custom'));
-  const templatesGrid = el('div', 'template-grid');
-  templateSection.append(templatesGrid, customNavBtn);
-
-  shell.append(createTopMenu(router), header, flash, templateSection);
+  shell.append(createTopMenu(router), header, flash, card);
   mountDesktopLayout(page, shell, desktopSidebar);
   page.append(createMobileNav(router, 'habits'));
   container.replaceChildren(page);
 
   let currentUser = null;
+  let currentTemplate = null;
+  const setFlash = (message, error = false) => {
+    flash.textContent = message || '';
+    flash.dataset.error = message ? String(error) : '';
+  };
+
+  confirm.addEventListener('click', async () => {
+    if (!currentUser || !currentTemplate) return;
+    const approved = window.confirm(`Create habit from "${currentTemplate.title}" template?`);
+    if (!approved) return;
+    try {
+      await api('/api/habits', {
+        method: 'POST',
+        body: JSON.stringify({
+          user_id: currentUser.id,
+          title: currentTemplate.title,
+          description: currentTemplate.description || null,
+          frequency: currentTemplate.frequency,
+          target_count: Number(currentTemplate.target_count || 1),
+          unit: currentTemplate.unit || null
+        }),
+      });
+      router?.navigate('/habits');
+    } catch (error) {
+      setFlash(error.message || 'Failed to create habit', true);
+    }
+  });
+
   try {
     const session = await api('/api/auth/user');
     const users = await api('/api/users');
     currentUser = users.find((u) => u.username === session.username) || null;
-    if (!currentUser) throw new Error('User record not found');
+    if (!currentUser) throw new Error('User not found');
+
     const desktopUser = desktopSidebar.querySelector('[data-desktop-username="true"]');
     const desktopAvatar = desktopSidebar.querySelector('.desktop-side-avatar');
     if (desktopUser) desktopUser.textContent = currentUser.username;
     if (desktopAvatar) desktopAvatar.textContent = String(currentUser.username || 'U').slice(0, 1).toUpperCase();
 
     const templates = await api('/api/habit-templates');
-    templatesGrid.innerHTML = '';
-    templates.forEach((template) => {
-      const card = el('article', 'template-card');
-      card.append(
-        el('h3', 'tracker-card-title', template.title),
-        el('p', 'tracker-card-text', template.description || 'No description'),
-        el('p', 'tracker-card-meta', `${template.frequency} • ${template.target_count}${template.unit ? ` ${template.unit}` : ''}`)
-      );
+    currentTemplate = templates.find((t) => Number(t.id) === templateId) || null;
+    if (!currentTemplate) {
+      setFlash('Template not found', true);
+      confirm.disabled = true;
+      return;
+    }
 
-      const addButton = el('button', 'auth-button', 'Use Template');
-      addButton.type = 'button';
-      addButton.addEventListener('click', () => router?.navigate(`/habits/templates/${template.id}`));
-      card.append(addButton);
-      templatesGrid.append(card);
-    });
+    title.textContent = currentTemplate.title;
+    desc.textContent = currentTemplate.description || 'No description';
+    meta.textContent = `${currentTemplate.frequency} • ${currentTemplate.target_count}${currentTemplate.unit ? ` ${currentTemplate.unit}` : ''}`;
   } catch (_) {
     router?.navigate('/login');
   }

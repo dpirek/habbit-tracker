@@ -1,3 +1,5 @@
+import { createDesktopSidebar, mountDesktopLayout } from './desktop-sidebar.js';
+
 function el(tag, className, text) {
   const node = document.createElement(tag);
   if (className) node.className = className;
@@ -85,6 +87,15 @@ export default async function renderAdminPage(container, router) {
 
   const page = el('section', 'tracker-page');
   const shell = el('div', 'tracker-shell');
+  const desktopSidebar = createDesktopSidebar({
+    router,
+    activeKey: 'settings',
+    userName: 'User',
+    onLogout: async () => {
+      await api('/api/auth/sign-out', { method: 'POST' });
+      router?.navigate('/login');
+    }
+  });
 
   const header = el('header', 'tracker-header');
   header.append(
@@ -163,11 +174,16 @@ export default async function renderAdminPage(container, router) {
   });
 
   shell.append(createTopMenu(router), header, flash, tabs, usersPanel, categoriesPanel);
-  page.append(shell, createMobileNav(router, 'stats'));
+  mountDesktopLayout(page, shell, desktopSidebar);
+  page.append(createMobileNav(router, 'stats'));
   container.replaceChildren(page);
 
   try {
-    await api('/api/auth/user');
+    const authUser = await api('/api/auth/user');
+    const desktopUser = desktopSidebar.querySelector('[data-desktop-username="true"]');
+    const desktopAvatar = desktopSidebar.querySelector('.desktop-side-avatar');
+    if (desktopUser) desktopUser.textContent = authUser?.username || 'User';
+    if (desktopAvatar) desktopAvatar.textContent = String(authUser?.username || 'U').slice(0, 1).toUpperCase();
     await renderUsers();
     await renderCategories();
   } catch (_) {

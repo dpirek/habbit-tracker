@@ -17,7 +17,7 @@ async function api(path, options = {}) {
   return payload?.data;
 }
 
-function createMobileNav(router, activeKey = 'profile') {
+function createMobileNav(router, activeKey = 'today') {
   const nav = el('nav', 'mobile-bottom-nav');
   nav.setAttribute('aria-label', 'Mobile navigation');
 
@@ -65,91 +65,129 @@ function createTopMenu(router) {
 
   const right = el('button', 'mobile-top-menu-btn');
   right.type = 'button';
-  right.setAttribute('aria-label', 'Notifications');
-  right.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 17H5.5a1.5 1.5 0 0 1-1.2-2.4L5 13.7V10a7 7 0 1 1 14 0v3.7l.7.9a1.5 1.5 0 0 1-1.2 2.4H17"/><path d="M9.5 19a2.5 2.5 0 0 0 5 0"/></svg>';
+  right.setAttribute('aria-label', 'More');
+  right.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="6" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="18" cy="12" r="1.8"/></svg>';
 
   bar.append(left, right);
   return bar;
 }
 
-export default async function renderProfilePage(container, router) {
+function dateKeyLocal(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+export default async function renderCalendarPage(container, router) {
   if (!container) return;
 
   const page = el('section', 'tracker-page');
   const shell = el('div', 'tracker-shell');
   const desktopSidebar = createDesktopSidebar({
     router,
-    activeKey: 'profile',
+    activeKey: 'calendar',
     userName: 'User',
     onLogout: async () => {
       await api('/api/auth/sign-out', { method: 'POST' });
       router?.navigate('/login');
     }
   });
-
   const header = el('header', 'tracker-header');
-  header.append(
-    el('h1', 'auth-title', 'Profile'),
-    el('p', 'auth-subtitle', 'Your account and progress settings.')
-  );
+  header.append(el('h1', 'auth-title', 'Calendar'), el('p', 'auth-subtitle', 'Track your daily completions.'));
 
-  const flash = el('p', 'auth-status');
-  const hero = el('section', 'profile-hero');
-  const avatar = el('div', 'profile-avatar', '👤');
-  const userName = el('h2', 'profile-name', 'Loading...');
-  const userEmail = el('p', 'profile-email', 'Loading...');
-  hero.append(avatar, userName, userEmail);
+  const card = el('section', 'tracker-section calendar-card');
+  const top = el('div', 'calendar-top-row');
+  const monthTitle = el('h2', 'calendar-month-title', '');
+  const controls = el('div', 'calendar-controls');
+  const prevBtn = el('button', 'calendar-arrow', '‹');
+  const nextBtn = el('button', 'calendar-arrow', '›');
+  prevBtn.type = 'button';
+  nextBtn.type = 'button';
+  controls.append(prevBtn, nextBtn);
+  top.append(monthTitle, controls);
 
-  const overview = el('section', 'tracker-section');
-  overview.append(el('h2', 'tracker-section-title', 'Overview'));
-  const grid = el('div', 'profile-overview-grid');
-  const stat1 = el('article', 'profile-overview-card mint');
-  const stat2 = el('article', 'profile-overview-card violet');
-  const stat3 = el('article', 'profile-overview-card sand');
-  stat1.append(el('p', 'profile-overview-value', '0'), el('p', 'profile-overview-label', 'Active Habits'));
-  stat2.append(el('p', 'profile-overview-value', '0'), el('p', 'profile-overview-label', 'Total Entries'));
-  stat3.append(el('p', 'profile-overview-value', '0'), el('p', 'profile-overview-label', 'Categories'));
-  grid.append(stat1, stat2, stat3);
-  overview.append(grid);
+  const daysHeader = el('div', 'calendar-days-header');
+  ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].forEach((d) => daysHeader.append(el('span', 'calendar-day-label', d)));
+  const grid = el('div', 'calendar-grid');
 
-  const settings = el('section', 'tracker-section');
-  settings.append(el('h2', 'tracker-section-title', 'Settings'));
-  const list = el('div', 'profile-settings-list');
-  const row1 = el('div', 'profile-settings-item');
-  row1.append(el('span', 'profile-settings-title', 'Notifications'), el('span', 'profile-settings-value', 'Enabled'));
-  const row2 = el('div', 'profile-settings-item');
-  row2.append(el('span', 'profile-settings-title', 'Theme'), el('span', 'profile-settings-value', 'Light'));
-  const row3 = el('div', 'profile-settings-item');
-  row3.append(el('span', 'profile-settings-title', 'Account'), el('span', 'profile-settings-value', 'Standard'));
-  list.append(row1, row2, row3);
-  settings.append(list);
-
-  shell.append(createTopMenu(router), header, flash, hero, overview, settings);
+  card.append(top, daysHeader, grid);
+  shell.append(createTopMenu(router), header, card);
   mountDesktopLayout(page, shell, desktopSidebar);
-  page.append(createMobileNav(router, 'profile'));
+  page.append(createMobileNav(router, 'today'));
   container.replaceChildren(page);
+
+  const state = {
+    monthAnchor: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+    completedDateKeys: new Set(),
+  };
+
+  function renderMonth() {
+    const year = state.monthAnchor.getFullYear();
+    const month = state.monthAnchor.getMonth();
+    const today = new Date();
+    monthTitle.textContent = state.monthAnchor.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+
+    grid.innerHTML = '';
+    const firstDay = new Date(year, month, 1);
+    const start = (firstDay.getDay() + 6) % 7;
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    for (let i = 0; i < start; i += 1) {
+      grid.append(el('span', 'calendar-cell empty'));
+    }
+
+    for (let day = 1; day <= daysInMonth; day += 1) {
+      const current = new Date(year, month, day);
+      const key = dateKeyLocal(current);
+      const cell = el('span', 'calendar-cell', String(day));
+      const done = state.completedDateKeys.has(key);
+      const isToday = current.getFullYear() === today.getFullYear()
+        && current.getMonth() === today.getMonth()
+        && current.getDate() === today.getDate();
+
+      if (done) {
+        cell.classList.add('done');
+        cell.textContent = '✓';
+      }
+      if (isToday) {
+        cell.classList.add('today');
+        if (!done) cell.textContent = String(day);
+      }
+      grid.append(cell);
+    }
+  }
+
+  prevBtn.addEventListener('click', () => {
+    state.monthAnchor = new Date(state.monthAnchor.getFullYear(), state.monthAnchor.getMonth() - 1, 1);
+    renderMonth();
+  });
+  nextBtn.addEventListener('click', () => {
+    state.monthAnchor = new Date(state.monthAnchor.getFullYear(), state.monthAnchor.getMonth() + 1, 1);
+    renderMonth();
+  });
 
   try {
     const session = await api('/api/auth/user');
     const users = await api('/api/users');
-    const currentUser = users.find((u) => u.username === session.username) || null;
-    if (!currentUser) throw new Error('User record not found');
+    const currentUser = users.find((u) => u.username === session.username);
+    if (!currentUser) throw new Error('User not found');
     const desktopUser = desktopSidebar.querySelector('[data-desktop-username="true"]');
     const desktopAvatar = desktopSidebar.querySelector('.desktop-side-avatar');
     if (desktopUser) desktopUser.textContent = currentUser.username;
     if (desktopAvatar) desktopAvatar.textContent = String(currentUser.username || 'U').slice(0, 1).toUpperCase();
-    userName.textContent = currentUser.username;
-    userEmail.textContent = currentUser.email;
 
     const habits = await api(`/api/habits?user_id=${currentUser.id}`);
-    stat1.querySelector('.profile-overview-value').textContent = String(habits.length);
-
     const entriesByHabit = await Promise.all(habits.map(async (habit) => api(`/api/habits/${habit.id}/entries`)));
-    const totalEntries = entriesByHabit.reduce((sum, entries) => sum + entries.length, 0);
-    stat2.querySelector('.profile-overview-value').textContent = String(totalEntries);
-
-    const categories = await api('/api/categories');
-    stat3.querySelector('.profile-overview-value').textContent = String(categories.length);
+    const completed = new Set();
+    entriesByHabit.forEach((entries) => {
+      entries.forEach((entry) => {
+        const key = String(entry.entry_date || '').slice(0, 10);
+        if (key) completed.add(key);
+      });
+    });
+    state.completedDateKeys = completed;
+    renderMonth();
   } catch (_) {
     router?.navigate('/login');
   }

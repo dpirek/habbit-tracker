@@ -1,3 +1,5 @@
+import { createDesktopSidebar, mountDesktopLayout } from './desktop-sidebar.js';
+
 function el(tag, className, text) {
   const node = document.createElement(tag);
   if (className) node.className = className;
@@ -81,6 +83,15 @@ export default async function renderHabitEntriesPage(container, router, params =
 
   const page = el('section', 'tracker-page');
   const shell = el('div', 'tracker-shell');
+  const desktopSidebar = createDesktopSidebar({
+    router,
+    activeKey: 'today',
+    userName: 'User',
+    onLogout: async () => {
+      await api('/api/auth/sign-out', { method: 'POST' });
+      router?.navigate('/login');
+    }
+  });
 
   const header = el('header', 'tracker-header');
   const title = el('h1', 'auth-title', 'Entries');
@@ -98,7 +109,8 @@ export default async function renderHabitEntriesPage(container, router, params =
   entriesPanel.append(entriesForm, entriesList);
 
   shell.append(createTopMenu(router), header, flash, entriesPanel);
-  page.append(shell, createMobileNav(router, 'today'));
+  mountDesktopLayout(page, shell, desktopSidebar);
+  page.append(createMobileNav(router, 'today'));
   container.replaceChildren(page);
 
   const setFlash = (message, error = false) => {
@@ -148,7 +160,11 @@ export default async function renderHabitEntriesPage(container, router, params =
   });
 
   try {
-    await api('/api/auth/user');
+    const authUser = await api('/api/auth/user');
+    const desktopUser = desktopSidebar.querySelector('[data-desktop-username="true"]');
+    const desktopAvatar = desktopSidebar.querySelector('.desktop-side-avatar');
+    if (desktopUser) desktopUser.textContent = authUser?.username || 'User';
+    if (desktopAvatar) desktopAvatar.textContent = String(authUser?.username || 'U').slice(0, 1).toUpperCase();
     const habit = await api(`/api/habits/${habitId}`);
     title.textContent = habit?.title ? `Entries: ${habit.title}` : 'Entries';
     subtitle.textContent = `${habit?.target_count || 1}${habit?.unit ? ` ${habit.unit}` : ''} • ${habit?.frequency || 'daily'}`;

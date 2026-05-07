@@ -7,6 +7,9 @@ import renderHabitsPage from './pages/habits.js';
 import renderProfilePage from './pages/profile.js';
 import renderHabitEntriesPage from './pages/habit-entries.js';
 import renderProgressPage from './pages/progress.js';
+import renderCalendarPage from './pages/calendar.js';
+import renderTemplateDetailPage from './pages/template-detail.js';
+import renderHabitCustomPage from './pages/habit-custom.js';
 
 export default function registerRoutes({ router, routeView }) {
   if (!router || !routeView) {
@@ -20,8 +23,11 @@ export default function registerRoutes({ router, routeView }) {
   add('/', () => renderLandingPage(routeView, router));
   add('/home', () => renderAppHomePage(routeView, router));
   add('/habits/:id/entries', (params) => renderHabitEntriesPage(routeView, router, params));
+  add('/habits/templates/:id', (params) => renderTemplateDetailPage(routeView, router, params));
+  add('/habits/custom', () => renderHabitCustomPage(routeView, router));
   add('/habits', () => renderHabitsPage(routeView, router));
   add('/progress', () => renderProgressPage(routeView, router));
+  add('/calendar', () => renderCalendarPage(routeView, router));
   add('/profile', () => renderProfilePage(routeView, router));
   add('/admin', () => renderAdminPage(routeView, router));
   add('/login', () => renderLoginPage(routeView, router));
