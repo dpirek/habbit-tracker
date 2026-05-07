@@ -2,6 +2,9 @@ const { route } = require('../utils/router');
 const {
   listUsers,
   createUser,
+  signIn,
+  signOut,
+  getAuthUser,
   listCategories,
   createCategory,
   listHabits,
@@ -19,8 +22,11 @@ const {
 const apiRoutes = route();
 
 apiRoutes.add('/api/health', 'GET', (_, res) => res.end('ok'));
-
 apiRoutes.add('/api/openapi', 'GET', getOpenApi);
+
+apiRoutes.add('/api/auth/sign-in', 'POST', signIn);
+apiRoutes.add('/api/auth/sign-out', 'POST', signOut);
+apiRoutes.add('/api/auth/user', 'GET', getAuthUser);
 
 apiRoutes.add('/api/users', 'GET', listUsers);
 apiRoutes.add('/api/users', 'POST', createUser);
