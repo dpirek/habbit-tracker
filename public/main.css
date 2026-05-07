@@ -545,6 +545,10 @@ body {
   gap: 10px;
 }
 
+.habits-custom-button {
+  margin-top: 16px;
+}
+
 .progress-tabs {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

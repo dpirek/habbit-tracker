@@ -103,7 +103,7 @@ export default async function renderHabitsPage(container, router) {
 
   const templateSection = el('section');
   templateSection.append(el('h2', 'tracker-section-title', 'Habit Templates'));
-  const customNavBtn = el('button', 'auth-button', 'Create Custom Habit');
+  const customNavBtn = el('button', 'auth-button habits-custom-button', 'Create Custom Habit');
   customNavBtn.type = 'button';
   customNavBtn.addEventListener('click', () => router?.navigate('/habits/custom'));
   const templatesGrid = el('div', 'template-grid');
