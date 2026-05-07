@@ -9,11 +9,11 @@ export default function renderRegisterPage(container, router) {
 
   const title = document.createElement('h1');
   title.className = 'auth-title';
-  title.textContent = 'Register';
+  title.textContent = 'Create Account';
 
   const subtitle = document.createElement('p');
   subtitle.className = 'auth-subtitle';
-  subtitle.textContent = 'Create an account to start building habits.';
+  subtitle.textContent = 'Start with one habit. Build your streak daily.';
 
   const form = document.createElement('form');
   form.className = 'auth-form';
@@ -26,7 +26,6 @@ export default function renderRegisterPage(container, router) {
   username.className = 'auth-input';
   username.name = 'username';
   username.required = true;
-  username.placeholder = 'brady';
 
   const emailLabel = document.createElement('label');
   emailLabel.className = 'auth-label';
@@ -37,7 +36,6 @@ export default function renderRegisterPage(container, router) {
   email.type = 'email';
   email.name = 'email';
   email.required = true;
-  email.placeholder = 'brady@example.com';
 
   const passLabel = document.createElement('label');
   passLabel.className = 'auth-label';

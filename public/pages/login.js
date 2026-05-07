@@ -9,11 +9,11 @@ export default function renderLoginPage(container, router) {
 
   const title = document.createElement('h1');
   title.className = 'auth-title';
-  title.textContent = 'Login';
+  title.textContent = 'Welcome Back';
 
   const subtitle = document.createElement('p');
   subtitle.className = 'auth-subtitle';
-  subtitle.textContent = 'Sign in to continue tracking your habits.';
+  subtitle.textContent = 'Track your streaks and keep momentum.';
 
   const form = document.createElement('form');
   form.className = 'auth-form';
@@ -26,7 +26,6 @@ export default function renderLoginPage(container, router) {
   identifier.className = 'auth-input';
   identifier.name = 'identifier';
   identifier.required = true;
-  identifier.placeholder = 'brady or brady@example.com';
 
   const passLabel = document.createElement('label');
   passLabel.className = 'auth-label';

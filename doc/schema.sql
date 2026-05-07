@@ -61,6 +61,20 @@ CREATE TABLE habits (
 
 ---------------------------------------------------
 
+-- HABIT TEMPLATES
+CREATE TABLE habit_templates (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    title VARCHAR(255) UNIQUE NOT NULL,
+    description TEXT,
+    frequency ENUM('daily', 'weekly', 'monthly') NOT NULL,
+    target_count INT DEFAULT 1,
+    unit VARCHAR(50),
+    icon VARCHAR(50),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+---------------------------------------------------
+
 -- HABIT CHECK-INS / COMPLETIONS
 CREATE TABLE habit_entries (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,

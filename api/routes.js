@@ -6,6 +6,7 @@ const {
   signOut,
   getAuthUser,
   listCategories,
+  listHabitTemplates,
   createCategory,
   listHabits,
   createHabit,
@@ -33,6 +34,7 @@ apiRoutes.add('/api/users', 'POST', createUser);
 
 apiRoutes.add('/api/categories', 'GET', listCategories);
 apiRoutes.add('/api/categories', 'POST', createCategory);
+apiRoutes.add('/api/habit-templates', 'GET', listHabitTemplates);
 
 apiRoutes.add('/api/habits', 'GET', listHabits);
 apiRoutes.add('/api/habits', 'POST', createHabit);

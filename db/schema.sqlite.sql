@@ -16,6 +16,17 @@ CREATE TABLE IF NOT EXISTS habit_categories (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS habit_templates (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT NOT NULL UNIQUE,
+  description TEXT,
+  frequency TEXT NOT NULL CHECK (frequency IN ('daily', 'weekly', 'monthly')),
+  target_count INTEGER NOT NULL DEFAULT 1,
+  unit TEXT,
+  icon TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS habits (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id INTEGER NOT NULL,
@@ -98,3 +109,13 @@ FOR EACH ROW
 BEGIN
   UPDATE habit_streaks SET updated_at = datetime('now') WHERE id = OLD.id;
 END;
+
+INSERT OR IGNORE INTO habit_templates (title, description, frequency, target_count, unit, icon) VALUES
+('Drink Water', 'Stay hydrated every day.', 'daily', 8, 'glasses', 'water'),
+('Exercise', 'Move your body for better health.', 'daily', 30, 'minutes', 'exercise'),
+('Read a Book', 'Read to grow your knowledge.', 'daily', 20, 'pages', 'book'),
+('Meditate', 'Practice mindfulness and calm.', 'daily', 10, 'minutes', 'meditation'),
+('Sleep 8 Hours', 'Get enough sleep for recovery.', 'daily', 8, 'hours', 'sleep'),
+('No Sugar', 'Avoid added sugar this week.', 'weekly', 7, 'days', 'nutrition'),
+('Weekly Review', 'Reflect on goals and progress.', 'weekly', 1, 'session', 'review'),
+('Deep Clean', 'Clean and organize your space.', 'weekly', 1, 'session', 'cleaning');

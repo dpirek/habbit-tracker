@@ -1,7 +1,5 @@
 export default async function renderHomePage(container, router) {
-  if (!container) {
-    return;
-  }
+  if (!container) return;
 
   const page = document.createElement('section');
   page.className = 'auth-page';
@@ -11,11 +9,11 @@ export default async function renderHomePage(container, router) {
 
   const title = document.createElement('h1');
   title.className = 'auth-title';
-  title.textContent = 'Lively Habit Tracker';
+  title.textContent = 'Good morning';
 
   const subtitle = document.createElement('p');
   subtitle.className = 'auth-subtitle';
-  subtitle.textContent = 'Create habits, track progress, and keep your streak alive.';
+  subtitle.textContent = 'Small steps, big changes. Build consistency with tiny wins.';
 
   const actions = document.createElement('div');
   actions.className = 'auth-actions';
@@ -29,7 +27,7 @@ export default async function renderHomePage(container, router) {
   const registerButton = document.createElement('button');
   registerButton.type = 'button';
   registerButton.className = 'auth-link-button';
-  registerButton.textContent = 'Register';
+  registerButton.textContent = 'Create Account';
   registerButton.addEventListener('click', () => router?.navigate('/register'));
 
   actions.append(loginButton, registerButton);

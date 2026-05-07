@@ -86,6 +86,11 @@ function listCategories(_, res) {
   return ok(res, rows);
 }
 
+function listHabitTemplates(_, res) {
+  const rows = getDb().prepare('SELECT * FROM habit_templates ORDER BY title ASC').all();
+  return ok(res, rows);
+}
+
 async function createCategory(req, res) {
   const body = await parseJsonBody(req);
   if (!body.name) return fail(res, 400, 'name is required');
@@ -235,6 +240,7 @@ module.exports = {
   signOut,
   getAuthUser,
   listCategories,
+  listHabitTemplates,
   createCategory,
   listHabits,
   createHabit,
