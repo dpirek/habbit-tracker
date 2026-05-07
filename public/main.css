@@ -1,0 +1,20 @@
+@font-face {
+  font-family: 'Cloudy Morning';
+  src: url('./fonts/cloudy-morning.woff2') format('woff2'),
+    url('./fonts/cloudy-morning.woff') format('woff'),
+    url('./fonts/cloudy-morning.ttf') format('truetype'),
+    url('./fonts/cloudy-morning.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Cloudy Morning', sans-serif;
+}
+
+body {
+  background: rgb(0, 44, 78);
+}

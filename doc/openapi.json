@@ -1,0 +1,227 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Habit Tracker API",
+    "version": "1.0.0",
+    "description": "SQLite-backed APIs generated from doc/schema.sql"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8006"
+    }
+  ],
+  "paths": {
+    "/api/health": {
+      "get": {
+        "summary": "Health check",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/openapi": {
+      "get": {
+        "summary": "Get OpenAPI document",
+        "responses": {
+          "200": {
+            "description": "OpenAPI JSON"
+          }
+        }
+      }
+    },
+    "/api/users": {
+      "get": {
+        "summary": "List users",
+        "responses": { "200": { "description": "User list" } }
+      },
+      "post": {
+        "summary": "Create user",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateUserRequest" }
+            }
+          }
+        },
+        "responses": { "201": { "description": "User created" } }
+      }
+    },
+    "/api/categories": {
+      "get": {
+        "summary": "List habit categories",
+        "responses": { "200": { "description": "Category list" } }
+      },
+      "post": {
+        "summary": "Create habit category",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateCategoryRequest" }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Category created" } }
+      }
+    },
+    "/api/habits": {
+      "get": {
+        "summary": "List habits",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "query",
+            "schema": { "type": "integer" }
+          }
+        ],
+        "responses": { "200": { "description": "Habit list" } }
+      },
+      "post": {
+        "summary": "Create habit",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateHabitRequest" }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Habit created" } }
+      }
+    },
+    "/api/habits/{id}": {
+      "get": {
+        "summary": "Get habit",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "Habit" }, "404": { "description": "Not found" } }
+      },
+      "patch": {
+        "summary": "Update habit",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateHabitRequest" }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Habit updated" }, "404": { "description": "Not found" } }
+      },
+      "delete": {
+        "summary": "Delete habit",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "Deleted" }, "404": { "description": "Not found" } }
+      }
+    },
+    "/api/habits/{id}/entries": {
+      "get": {
+        "summary": "List entries for habit",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "Entry list" } }
+      },
+      "post": {
+        "summary": "Create entry for habit",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateEntryRequest" }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Entry created" } }
+      }
+    },
+    "/api/entries/{id}": {
+      "patch": {
+        "summary": "Update entry",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateEntryRequest" }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Entry updated" }, "404": { "description": "Not found" } }
+      },
+      "delete": {
+        "summary": "Delete entry",
+        "parameters": [
+          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+        ],
+        "responses": { "200": { "description": "Deleted" }, "404": { "description": "Not found" } }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateUserRequest": {
+        "type": "object",
+        "required": ["username", "email", "password_hash"],
+        "properties": {
+          "username": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "password_hash": { "type": "string" }
+        }
+      },
+      "CreateCategoryRequest": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" },
+          "color": { "type": "string" }
+        }
+      },
+      "CreateHabitRequest": {
+        "type": "object",
+        "required": ["user_id", "title", "frequency"],
+        "properties": {
+          "user_id": { "type": "integer" },
+          "category_id": { "type": "integer" },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "frequency": { "type": "string", "enum": ["daily", "weekly", "monthly"] },
+          "target_count": { "type": "integer" },
+          "unit": { "type": "string" },
+          "is_active": { "type": "boolean" },
+          "start_date": { "type": "string", "format": "date" },
+          "end_date": { "type": "string", "format": "date" }
+        }
+      },
+      "UpdateHabitRequest": {
+        "allOf": [{ "$ref": "#/components/schemas/CreateHabitRequest" }]
+      },
+      "CreateEntryRequest": {
+        "type": "object",
+        "required": ["entry_date"],
+        "properties": {
+          "entry_date": { "type": "string", "format": "date" },
+          "value": { "type": "number" },
+          "notes": { "type": "string" }
+        }
+      },
+      "UpdateEntryRequest": {
+        "allOf": [{ "$ref": "#/components/schemas/CreateEntryRequest" }]
+      }
+    }
+  }
+}
