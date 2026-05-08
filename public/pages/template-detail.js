@@ -74,7 +74,7 @@ export default async function renderTemplateDetailPage(container, router, params
 
   const calendarCard = el('section', 'tracker-section template-detail-card');
   const calendarHead = el('div', 'tracker-habits-title-row');
-  calendarHead.append(el('h3', 'template-detail-card-title', 'Calendar'), el('span', 'template-detail-link', 'View all'));
+  calendarHead.append(el('h3', 'template-detail-card-title', 'Calendar'));
   const calendarMeta = el('p', 'tracker-card-meta', '');
   const templateCalendarWidget = new CalendarWidget({
     variant: 'template',
