@@ -797,6 +797,13 @@ body {
   letter-spacing: 0.3px;
 }
 
+.login-logo {
+  width: 56px;
+  height: 56px;
+  display: block;
+  margin-bottom: 10px;
+}
+
 .login-title {
   margin-top: 8px;
   font-size: clamp(42px, 6vw, 54px);

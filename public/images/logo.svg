@@ -1,0 +1,33 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad" x1="96" y1="80" x2="416" y2="432" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6C63FF"></stop>
+      <stop offset="1" stop-color="#8B7CFF"></stop>
+    </linearGradient>
+  </defs>
+
+  <!-- App Background -->
+  <rect x="48" y="48" width="416" height="416" rx="110" fill="url(#grad)"></rect>
+
+  <!-- Calendar Card -->
+  <rect x="132" y="120" width="248" height="272" rx="40" fill="white"></rect>
+
+  <!-- Top Calendar Bar -->
+  <rect x="132" y="120" width="248" height="64" rx="40" fill="#F3F2FF"></rect>
+
+  <!-- Calendar Rings -->
+  <rect x="180" y="92" width="20" height="56" rx="10" fill="white"></rect>
+  <rect x="312" y="92" width="20" height="56" rx="10" fill="white"></rect>
+
+  <!-- Habit Check Dots -->
+  <circle cx="188" cy="236" r="18" fill="#34C759"></circle>
+  <circle cx="256" cy="236" r="18" fill="#34C759"></circle>
+  <circle cx="324" cy="236" r="18" fill="#6C63FF"></circle>
+
+  <!-- Main Check -->
+  <path d="M315 306L245 306L222 282" stroke="#6C63FF" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"></path>
+
+  <!-- Progress Line -->
+  <rect x="176" y="336" width="160" height="14" rx="7" fill="#E9E7FF"></rect>
+  <rect x="176" y="336" width="110" height="14" rx="7" fill="#6C63FF"></rect>
+</svg>

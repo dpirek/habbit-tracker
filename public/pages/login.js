@@ -7,6 +7,11 @@ export default function renderLoginPage(container, router) {
   const card = document.createElement('div');
   card.className = 'auth-card login-card';
 
+  const logo = document.createElement('img');
+  logo.className = 'login-logo';
+  logo.src = '/images/logo.svg';
+  logo.alt = 'Habbit Tracker logo';
+
   const title = document.createElement('h1');
   title.className = 'auth-title login-title';
   title.textContent = 'Welcome back';
@@ -54,7 +59,7 @@ export default function renderLoginPage(container, router) {
   switchLink.addEventListener('click', () => router?.navigate('/register'));
 
   form.append(idLabel, identifier, passLabel, password, submit, status);
-  card.append(title, subtitle, form, switchLink);
+  card.append(logo, title, subtitle, form, switchLink);
   page.append(card);
 
   form.addEventListener('submit', async (event) => {
